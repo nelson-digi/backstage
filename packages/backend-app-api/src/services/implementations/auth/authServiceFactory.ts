@@ -26,7 +26,6 @@ import {
   coreServices,
   createServiceFactory,
   DatabaseService,
-  AnyJWK,
 } from '@backstage/backend-plugin-api';
 import { AuthenticationError } from '@backstage/errors';
 import { IdentityApiGetIdentityRequest } from '@backstage/plugin-auth-node';
@@ -238,10 +237,6 @@ class DefaultAuthService implements AuthService {
       throw new AuthenticationError('User token is missing expiration');
     }
     return new Date(exp * 1000);
-  }
-
-  listPublicKeys(): Promise<AnyJWK[]> {
-    return this.pluginTokenHandler.listPublicKeys();
   }
 }
 
