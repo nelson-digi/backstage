@@ -110,7 +110,6 @@ class DefaultAuthService implements AuthService {
     private readonly identity: IdentityService,
     private readonly pluginId: string,
     private readonly disableDefaultAuthPolicy: boolean,
-    private readonly databaseService: DatabaseService,
     private readonly pluginTokenHandler: PluginTokenHandler,
   ) {}
 
@@ -244,7 +243,6 @@ class DefaultAuthService implements AuthService {
 export const authServiceFactory = createServiceFactory({
   service: coreServices.auth,
   deps: {
-    database: coreServices.database,
     config: coreServices.rootConfig,
     logger: coreServices.rootLogger,
     plugin: coreServices.pluginMetadata,
@@ -254,8 +252,16 @@ export const authServiceFactory = createServiceFactory({
     // keeps working as long as there are plugins that have not been migrated to the
     // new auth services in the new backend system.
     tokenManager: coreServices.tokenManager,
+    publicKeyStore: coreServices.publicKeyStore,
   },
-  async factory({ config, plugin, identity, tokenManager, database }) {
+  async factory({
+    config,
+    plugin,
+    identity,
+    tokenManager,
+    logger,
+    publicKeyStore,
+  }) {
     const disableDefaultAuthPolicy = Boolean(
       config.getOptionalBoolean(
         'backend.auth.dangerouslyDisableDefaultAuthPolicy',
@@ -266,9 +272,12 @@ export const authServiceFactory = createServiceFactory({
       identity,
       plugin.getId(),
       disableDefaultAuthPolicy,
-      database,
-      // TODO(vinzscam): fixme
-      PluginTokenHandler.create(undefined!),
+      PluginTokenHandler.create({
+        keyDurationSeconds: 60 * 60,
+        issuer: `plugin:${plugin.getId()}`,
+        logger,
+        publicKeyStore,
+      }),
     );
   },
 });
