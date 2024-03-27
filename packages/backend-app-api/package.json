@@ -38,7 +38,8 @@
   "files": [
     "dist",
     "config.d.ts",
-    "alpha"
+    "alpha",
+    "migrations/**/*.{js,d.ts}"
   ],
   "scripts": {
     "build": "backstage-cli package build",
